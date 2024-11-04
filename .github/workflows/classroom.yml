@@ -1,0 +1,31 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Zaliczenie
+      id: zaliczenie
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Zaliczenie
+        setup-command: mkdir -p build && cd build && cmake .. && make && chmod +x
+          ./zal
+        command: cd build && ./zal
+        timeout: 10
+        max-score: 5
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        ZALICZENIE_RESULTS: "${{steps.zaliczenie.outputs.result}}"
+      with:
+        runners: zaliczenie
